@@ -49,14 +49,14 @@ set -- "${pos_args[@]}"
 # No positional argument means no file was specified
 [[ ${#pos_args[@]} -eq 0 ]] && error "No file specified."
 
-# File exists or error
-[[ -e "$1" ]] || error "'${1}' file doesn't exist."
+# File/symlink exists or error. -e follows symlinks and fails on a broken link -> check -L too.
+[[ -e "$1" || -L "$1" ]] || error "'${1}' file doesn't exist."
 
 # Get file type (Unix has 7 file types)
 file_type=""
-if [[ -f "$1" ]]; then file_type="File"
+if [[ -L "$1" ]]; then file_type="Symlink"
+elif [[ -f "$1" ]]; then file_type="File"
 elif [[ -d "$1" ]]; then file_type="Dir"
-elif [[ -L "$1" ]]; then file_type="Symlink"
 elif [[ -p "$1" ]]; then file_type="FIFO special"
 elif [[ -S "$1" ]]; then file_type="Socket"
 elif [[ -b "$1" ]]; then file_type="Block special"
@@ -64,8 +64,14 @@ elif [[ -c "$1" ]]; then file_type="Character special"
 else file_type="unknown"
 fi
 
-# Get size on disk (only human-reaable size without filename with trimmed whitespaces)
-disk_size=$(du -sh "$1" | cut -f 1 | xargs)
+# Get size on disk
+if [[ "$file_type" == "Symlink" && ! -e "$1" ]]; then
+    # Skip du on a broken symlink -> nothing to measure.
+    disk_size="-"
+else
+    # Only human-reaable size without filename with trimmed whitespaces
+    disk_size=$(du -sh "$1" | cut -f 1 | xargs)
+fi
 
 # Get actual file content type
 content_type=$(file -b "$1")

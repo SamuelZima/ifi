@@ -20,13 +20,13 @@ Supported platforms: Linux, macOS (Darwin), FreeBSD, OpenBSD, NetBSD.
 curl -fsSL https://github.com/SamuelZima/ifi/releases/latest/download/install.sh | bash
 ```
 
-Picks `/usr/local/bin` or falls back to `~/.local/bin` if that isn't writable. Installs latest released version.
+Installs to `/usr/local/bin/ifi` (uses `sudo` if that isn't writable). Always installs the latest released version.
 
 **Option 2: manual curl**
 
 ```bash
-curl -fsSL https://github.com/SamuelZima/ifi/releases/latest/download/ifi.sh -o /usr/local/bin/ifi
-chmod +x /usr/local/bin/ifi
+sudo curl -fsSL https://github.com/SamuelZima/ifi/releases/latest/download/ifi.sh -o /usr/local/bin/ifi
+sudo chmod +x /usr/local/bin/ifi
 ```
 
 **Option 3: clone the repo and create symlink**
@@ -34,7 +34,13 @@ chmod +x /usr/local/bin/ifi
 ```bash
 git clone https://github.com/SamuelZima/ifi.git
 chmod +x ifi/ifi.sh
-ln -s "$(pwd)/ifi/ifi.sh" /usr/local/bin/ifi
+sudo ln -s "$(pwd)/ifi/ifi.sh" /usr/local/bin/ifi
+```
+
+## Uninstall
+
+```bash
+sudo rm /usr/local/bin/ifi
 ```
 
 ## Usage

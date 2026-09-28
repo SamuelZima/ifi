@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 usage() {
-    echo "Usage: ./ifi.sh [-j|--json] [-h|--help] <path_to_file>"
+    echo "ifi - inspect file information (type, size, permissions, ownership, timestamps, etc.)"
+    echo ""
+    echo "Usage: ./ifi.sh [-j|--json] [-h|--help] <path_to_file> [path_to_file ...]"
     echo ""
     echo "Options:"
     echo "  -j, --json    Output file info as JSON"

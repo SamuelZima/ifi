@@ -1,8 +1,9 @@
 # ifi - Inspect File Info
 
-A simple tool that prints detailed information about one or more files as either a valid JSON format or human readable format.
-The file information include: type, size, content type, permissions, ownership, timestamps, inode,
-link count, and the setuid/setgid/sticky bits.
+ifi is a single bash script that replaces the usual `stat`, `file`, and `du` shuffle. Point it at one or more files and get a complete report: 
+type, content type, size (apparent and on disk), permissions (symbolic and octal), ownership, timestamps, inode, link count, and the setuid/setgid/sticky bits.
+
+Output is a readable table by default, or valid JSON with `-j` or `--json` option for piping into scripts and tools like `jq`. Works on Linux, macOS, and BSD.
 
 ## Requirements
 

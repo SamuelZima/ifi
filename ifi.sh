@@ -16,7 +16,7 @@ error() {
 
 OS=$(uname -s)
 
-# Arg handling (options and positional arguments)
+# ARG HANDLING
 pos_args=()
 json=0
 help=0
@@ -49,85 +49,97 @@ set -- "${pos_args[@]}"
 # No positional argument means no file was specified
 [[ ${#pos_args[@]} -eq 0 ]] && error "No file specified."
 
-# File/symlink exists or error. -e follows symlinks and fails on a broken link -> check -L too.
-[[ -e "$1" || -L "$1" ]] || error "'${1}' file doesn't exist."
+# MAIN FUNCTIONALITY
+fields=()
+while [[ $# -gt 0 ]]; do
+    # File/symlink exists or error. -e follows symlinks and fails on a broken link -> check -L too.
+    [[ -e "$1" || -L "$1" ]] || error "'${1}' file doesn't exist."
 
-# Get file type (Unix has 7 file types)
-file_type=""
-if [[ -L "$1" ]]; then file_type="Symlink"
-elif [[ -f "$1" ]]; then file_type="File"
-elif [[ -d "$1" ]]; then file_type="Dir"
-elif [[ -p "$1" ]]; then file_type="FIFO special"
-elif [[ -S "$1" ]]; then file_type="Socket"
-elif [[ -b "$1" ]]; then file_type="Block special"
-elif [[ -c "$1" ]]; then file_type="Character special"
-else file_type="unknown"
-fi
+    # Get file type (Unix has 7 file types)
+    file_type=""
+    if [[ -L "$1" ]]; then file_type="Symlink"
+    elif [[ -f "$1" ]]; then file_type="File"
+    elif [[ -d "$1" ]]; then file_type="Dir"
+    elif [[ -p "$1" ]]; then file_type="FIFO special"
+    elif [[ -S "$1" ]]; then file_type="Socket"
+    elif [[ -b "$1" ]]; then file_type="Block special"
+    elif [[ -c "$1" ]]; then file_type="Character special"
+    else file_type="unknown"
+    fi
 
-# Get size on disk
-if [[ "$file_type" == "Symlink" && ! -e "$1" ]]; then
-    # Skip du on a broken symlink -> nothing to measure.
-    disk_size="-"
-else
-    # Only human-reaable size without filename with trimmed whitespaces
-    disk_size=$(du -sh "$1" | cut -f 1 | xargs)
-fi
+    # Get size on disk
+    if [[ "$file_type" == "Symlink" && ! -e "$1" ]]; then
+        # Skip du on a broken symlink -> nothing to measure.
+        disk_size="-"
+    else
+        # Only human-reaable size without filename with trimmed whitespaces
+        disk_size=$(du -sh "$1" | cut -f 1 | xargs)
+    fi
 
-# Get actual file content type
-content_type=$(file -b "$1")
+    # Get actual file content type
+    content_type=$(file -b "$1")
 
-# Get Set-user-id for file
-[[ -u "$1" ]] && suid="True" || suid="False"
+    # Get Set-user-id for file
+    [[ -u "$1" ]] && suid="True" || suid="False"
 
-# Get Group-use-id for file
-[[ -g "$1" ]] && guid="True" || guid="False"
+    # Get Group-use-id for file
+    [[ -g "$1" ]] && guid="True" || guid="False"
 
-# Get sticky bit for file
-[[ -k "$1" ]] && sticky="True" || sticky="False"
+    # Get sticky bit for file
+    [[ -k "$1" ]] && sticky="True" || sticky="False"
 
-# Get other important file info using stat
-case "$OS" in
-    Darwin|FreeBSD|OpenBSD|NetBSD)
-        IFS='|' read -r f_user f_uid f_group f_gid f_size f_mtime f_atime f_ctime f_str_perms f_oct_perms f_link_count f_inode \
-            < <(stat -f '%Su|%u|%Sg|%g|%z|%Sm|%Sa|%Sc|%Sp|%Lp|%l|%i' "$1")
-        ;;
-    Linux)
-        IFS='|' read -r f_user f_uid f_group f_gid f_size f_mtime f_atime f_ctime f_str_perms f_oct_perms f_link_count f_inode \
-            < <(stat -c '%U|%u|%G|%g|%s|%y|%x|%z|%A|%a|%h|%i' "$1")
-        ;;
-    *)
-        error "'${OS}' is not supported."
-        ;;
-esac
+    # Get other important file info using stat
+    case "$OS" in
+        Darwin|FreeBSD|OpenBSD|NetBSD)
+            IFS='|' read -r f_user f_uid f_group f_gid f_size f_mtime f_atime f_ctime f_str_perms f_oct_perms f_link_count f_inode \
+                < <(stat -f '%Su|%u|%Sg|%g|%z|%Sm|%Sa|%Sc|%Sp|%Lp|%l|%i' "$1")
+            ;;
+        Linux)
+            IFS='|' read -r f_user f_uid f_group f_gid f_size f_mtime f_atime f_ctime f_str_perms f_oct_perms f_link_count f_inode \
+                < <(stat -c '%U|%u|%G|%g|%s|%y|%x|%z|%A|%a|%h|%i' "$1")
+            ;;
+        *)
+            error "'${OS}' is not supported."
+            ;;
+    esac
 
-# Build the final info fields array (JSON key | Human label | value)
-fields=(
-    "type|Type|${file_type}"
-    "content_type|Content type|${content_type}"
-    "file_size|File size|${f_size}B"
-    "disk_size|Disk size|${disk_size}"
-    "permissions_string|String permissions|${f_str_perms}"
-    "permissions_octal|Octal permissions|${f_oct_perms}"
-    "owner_name|Owner name|${f_user}"
-    "owner_id|Owner ID|${f_uid}"
-    "group|Group|${f_group}"
-    "group_id|Group ID|${f_gid}"
-    "accessed_at|Accessed at|${f_atime}"
-    "modified_at|Modified at|${f_mtime}"
-    "changed_at|Changed at|${f_ctime}"
-    "link_count|Link count|${f_link_count}"
-    "inode|Inode|${f_inode}"
-    "setuid|Set User ID|${suid}"
-    "setgid|Set Group ID|${guid}"
-    "sticky|Sticky Bit|${sticky}"
-)
+    # Build the final info fields array (JSON key | Human label | value)
+    fields+=(
+        "filename|Filename|${1}"
+        "type|Type|${file_type}"
+        "content_type|Content type|${content_type}"
+        "file_size|File size|${f_size}B"
+        "disk_size|Disk size|${disk_size}"
+        "permissions_string|String permissions|${f_str_perms}"
+        "permissions_octal|Octal permissions|${f_oct_perms}"
+        "owner_name|Owner name|${f_user}"
+        "owner_id|Owner ID|${f_uid}"
+        "group|Group|${f_group}"
+        "group_id|Group ID|${f_gid}"
+        "accessed_at|Accessed at|${f_atime}"
+        "modified_at|Modified at|${f_mtime}"
+        "changed_at|Changed at|${f_ctime}"
+        "link_count|Link count|${f_link_count}"
+        "inode|Inode|${f_inode}"
+        "setuid|Set User ID|${suid}"
+        "setgid|Set Group ID|${guid}"
+        "sticky|Sticky Bit|${sticky}"
+    )
+
+    shift
+done
 
 if [[ $json -eq 1 ]]; then
-    printf '%s\n' "${fields[@]}" | perl -MJSON::PP -F'\|' -ane '
-        chomp $F[2];
-        $h{$F[0]} = $F[2];
-        END { print JSON::PP->new->pretty->canonical->encode(\%h) }
+    # JSON output -> one object per file, a new record starts at each "filename" key.
+    printf '%s\n' "${fields[@]}" | perl -MJSON::PP -ne '
+        my ($k, undef, $v) = split /\|/, $_, 3;
+        chomp $v;
+        push @records, {} if $k eq "filename";
+        $records[-1]{$k} = $v;
+        END { print JSON::PP->new->pretty->canonical->encode(\@records) }
     '
 else
-    printf '%s\n' "${fields[@]}" | cut -d'|' -f2- | column -t -s '|'
+    # human-readable output -> mark file info boundaries with simple dashes
+    printf '%s\n' "${fields[@]}" | awk -F'|' '$1=="filename" && NR>1 {print "|--------"} {print}' \
+        | cut -d'|' -f2- | column -t -s '|'
 fi

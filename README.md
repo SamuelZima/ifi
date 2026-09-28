@@ -12,10 +12,35 @@ link count, and the setuid/setgid/sticky bits.
 
 Supported platforms: Linux, macOS (Darwin), FreeBSD, OpenBSD, NetBSD.
 
+## Install
+
+**Option 1: install script**
+
+```bash
+curl -fsSL https://github.com/SamuelZima/ifi/releases/latest/download/install.sh | bash
+```
+
+Picks `/usr/local/bin` or falls back to `~/.local/bin` if that isn't writable. Installs latest released version.
+
+**Option 2: manual curl**
+
+```bash
+curl -fsSL https://github.com/SamuelZima/ifi/releases/latest/download/ifi.sh -o /usr/local/bin/ifi
+chmod +x /usr/local/bin/ifi
+```
+
+**Option 3: clone the repo and create symlink**
+
+```bash
+git clone https://github.com/SamuelZima/ifi.git
+chmod +x ifi/ifi.sh
+ln -s "$(pwd)/ifi/ifi.sh" /usr/local/bin/ifi
+```
+
 ## Usage
 
 ```
-./ifi.sh [-j|--json] [-h|--help] <path_to_file> [path_to_file ...]
+ifi [-j|--json] [-h|--help] <path_to_file> [path_to_file ...]
 ```
 
 ## Options
@@ -30,21 +55,21 @@ Supported platforms: Linux, macOS (Darwin), FreeBSD, OpenBSD, NetBSD.
 Inspect a single file:
 
 ```
-./ifi.sh /etc/hosts
+ifi /etc/hosts
 ```
 
 Inspect multiple files:
 
 ```
-./ifi.sh file1.txt file2.txt
+ifi file1.txt file2.txt
 ```
 
 Get JSON output:
 
 ```
-./ifi.sh --json file1.txt
+ifi --json file1.txt
 
-./ifi.sh file1.txt file2.txt -j
+ifi file1.txt file2.txt -j
 ```
 
 ## Output fields

@@ -3,11 +3,12 @@
 usage() {
     echo "ifi - inspect file information and file metadata as a readable table or JSON"
     echo ""
-    echo "Usage: ifi [-j|--json] [-h|--help] <path_to_file> [path_to_file ...]"
+    echo "Usage: ifi [-j|--json] [-h|--help] [-v|--version] <path_to_file> [path_to_file ...]"
     echo ""
     echo "Options:"
-    echo "  -j, --json    Output file info as JSON"
-    echo "  -h, --help    Show this help message"
+    echo "  -j, --json     Output file info as JSON"
+    echo "  -h, --help     Show this help message"
+    echo "  -v, --version  Show version"
     exit 0
 }
 

@@ -47,7 +47,7 @@ sudo rm /usr/local/bin/ifi
 ## Usage
 
 ```
-ifi [-j|--json] [-h|--help] <path_to_file> [path_to_file ...]
+ifi [-j|--json] [-h|--help] [-v|--version] <path_to_file> [path_to_file ...]
 ```
 
 ## Options
@@ -56,6 +56,7 @@ ifi [-j|--json] [-h|--help] <path_to_file> [path_to_file ...]
 |------------------|--------------------------|
 | `-j`, `--json`   | Output file info as JSON |
 | `-h`, `--help`   | Show the help message    |
+| `-v`, `--version`| Show version    |
 
 ## Examples
 

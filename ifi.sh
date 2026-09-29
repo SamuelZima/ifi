@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 
 usage() {
-    echo "ifi - inspect file information (type, size, permissions, ownership, timestamps, etc.)"
+    echo "ifi - inspect file information and file metadata as a readable table or JSON"
     echo ""
-    echo "Usage: ./ifi.sh [-j|--json] [-h|--help] <path_to_file> [path_to_file ...]"
+    echo "Usage: ifi [-j|--json] [-h|--help] <path_to_file> [path_to_file ...]"
     echo ""
     echo "Options:"
     echo "  -j, --json    Output file info as JSON"
     echo "  -h, --help    Show this help message"
+    exit 0
+}
+
+version() {
+    echo "ifi v1.0.0"
     exit 0
 }
 
@@ -22,6 +27,7 @@ OS=$(uname -s)
 pos_args=()
 json=0
 help=0
+version=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -j|--json)
@@ -30,6 +36,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -h|--help)
             help=1
+            shift
+            ;;
+        -v|--version)
+            version=1
             shift
             ;;
         -*)
@@ -47,6 +57,9 @@ set -- "${pos_args[@]}"
 
 # Show usage if help option was set
 [[ $help -eq 1 ]] && usage
+
+# Show version if version option was set
+[[ $version -eq 1 ]] && version
 
 # No positional argument means no file was specified
 [[ ${#pos_args[@]} -eq 0 ]] && error "No file specified."
